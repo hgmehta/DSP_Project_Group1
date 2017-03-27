@@ -1,0 +1,10 @@
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\bin\Debug\FingerPrint.exe.config
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\bin\Debug\FingerPrint.exe
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\bin\Debug\FingerPrint.pdb
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\bin\Debug\SourceAFIS.dll
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\bin\Debug\SourceAFIS.xml
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.exe
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.pdb
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.csprojResolveAssemblyReference.cache
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.Plots.resources
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.csproj.GenerateResource.Cache
