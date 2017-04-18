@@ -7,13 +7,13 @@ using SourceAFIS.Simple;
 using System.Windows.Media.Imaging;
 using System.IO;
 using System.Windows.Forms;
-using System.Linq;
+using System.Drawing;
 
 namespace FingerPrint
 {
     class Program
     {
-        static void buildDB()
+        static void buildDB(int TotalFiles)
         {
             AfisEngine Afis = new AfisEngine();
 
@@ -22,16 +22,17 @@ namespace FingerPrint
             Fingerprint fp1 = new Fingerprint();
             Fingerprint fp2 = new Fingerprint();
 
-            string path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\score.txt";
+            string path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageScore.txt";
 
-            string[] files = new string[100];
-
+            string[] files = new string[TotalFiles];
+            string[] outerImages = new string[TotalFiles];
             int k = 0;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < TotalFiles/10; i++)
             {
                 for (int j = 1; j <= 10; j++)
                 {
                     files[k] = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Database\" + (i + 1).ToString() + "_" + j.ToString() + ".bmp";
+                    outerImages[k] = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Inner Images\ROI_" + (i + 1).ToString() + "_" + j.ToString() + ".png";
                     k++;
                 }
             }
@@ -47,7 +48,7 @@ namespace FingerPrint
 
                 for (int j = 0; j < files.Length; j++)
                 {
-                    fp2.AsBitmapSource = new BitmapImage(new Uri(files[j], UriKind.RelativeOrAbsolute));
+                    fp2.AsBitmapSource = new BitmapImage(new Uri(outerImages[j], UriKind.RelativeOrAbsolute));
                     Person person2 = new Person();
                     person2.Fingerprints.Add(fp2);
 
@@ -70,7 +71,7 @@ namespace FingerPrint
         static void normalizeScore()
         {
 
-            string[] lines = System.IO.File.ReadAllLines(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\score.txt");
+            string[] lines = System.IO.File.ReadAllLines(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageScore.txt");
             float[] score = new float[lines.Length];
             
             for (int i = 0; i < lines.Length; i++)
@@ -89,7 +90,7 @@ namespace FingerPrint
             }
 
 
-            string Path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\normalizedscore.txt";
+            string Path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageNormalizedScore.txt";
 
 
             using (StreamWriter sw = File.AppendText(Path))
@@ -135,12 +136,66 @@ namespace FingerPrint
 
         static void Main(string[] args)
         {
-            buildDB();
-            //test();
-            //normalizeScore();
-            //Application.EnableVisualStyles();
-            //Application.Run(new Plots());
+            /*
+            int TotalFiles = 30;
+            buildDB(TotalFiles);
+            test();
+            normalizeScore();
+
+            CropImage c1 = new CropImage();
+
+            Bitmap source = new Bitmap(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Database\01_1.bmp");
+            Rectangle section = new Rectangle(new Point(12, 50), new Size(150, 150));
+            Graphics g = Graphics.FromImage(source);
+            Bitmap CroppedImage = c1.CreateCropImage(source, section);
+            Application.EnableVisualStyles();
+            Application.Run(new Plots(TotalFiles));
+            */
+
+            // Finding an Hash sign of an inner image
+            getHash hash = new getHash();
+            string path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Inner Images\ROI_1_1.png";
+            byte[] hashCode = hash.getSHAofAnImage(path);
+
+            /*
+            for (int i=0;i<hashCode.Length;i++)
+            {
+                Console.WriteLine(hashCode[i].ToString());
+            }
+            Console.WriteLine("Length of Hash: "+hashCode.Length.ToString());
+            Console.ReadLine();
+            */
+
+            //Do watermarking
+            string outputImagePath;
+            GenerateWatermark watermark = new GenerateWatermark();
+
+            //Creating new watermarkerdimage 
+            Bitmap watermarkedImage = watermark.getWatermarkedImage(path, hashCode, out outputImagePath);
+            watermarkedImage.Save(outputImagePath);
             
+            //Retrive data from watermarked image
+            byte[] retrivedWatermark = watermark.retriveWatermark(outputImagePath);
+
+
+            //Chacking whether original data is matched with retrived data or not
+            bool value = true;
+            if (retrivedWatermark.Length != hashCode.Length)
+            {
+                value = false;
+            }
+            if (value)
+            {
+                for (int i = 0; i < retrivedWatermark.Length; i++)
+                {
+                    if (retrivedWatermark[i] != hashCode[i])
+                    {
+                        value = false;
+                    }
+                }
+            }
+            Console.WriteLine(value.ToString());
+            Console.ReadLine();
         }
     }
 }

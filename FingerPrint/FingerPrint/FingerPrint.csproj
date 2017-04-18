@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HiddenWatermark, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Sem 6\DSP\Project\DSPProject\Code\HiddenWatermark-master\HiddenWatermark\bin\Debug\HiddenWatermark.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="SourceAFIS">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\SourceAFIS\Bin\SourceAFIS.dll</HintPath>
@@ -48,8 +52,11 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GenerateWatermark.cs" />
+    <Compile Include="getHash.cs" />
     <Compile Include="Plots.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1723,6 +1730,11 @@
     <EmbeddedResource Include="Plots.resx">
       <DependentUpon>Plots.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Accord-net\" />
+    <Folder Include="Inner Images\" />
+    <Folder Include="Outer Images\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

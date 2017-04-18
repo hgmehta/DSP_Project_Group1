@@ -8,16 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Graph = System.Windows.Forms.DataVisualization.Charting;
-
+using System.IO;
 
 namespace FingerPrint
 {
     public partial class Plots : Form
     {
         Graph.Chart chart;
-        public Plots()
+        int totalFiles = 0;
+        public Plots(int TotalFiles)
         {
             InitializeComponent();
+            totalFiles = TotalFiles;
             this.ClientSize = new System.Drawing.Size(750, 900);
         }
 
@@ -56,19 +58,20 @@ namespace FingerPrint
             chart.Series["FRR"].BorderWidth = 3;
             //This function cannot include zero, and we walk through it in steps of 0.1 to add coordinates to our series
 
-            string[] lines = System.IO.File.ReadAllLines(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\normalizedscore.txt");
-            float[] score = new float[lines.Length];
+            string[] lines = System.IO.File.ReadAllLines(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageNormalizedScore.txt");
+            double[] score = new double[lines.Length];
 
             for (int i = 0; i < lines.Length; i++)
             {
-                score[i] = float.Parse(lines[i]);
+                score[i] = double.Parse(lines[i]);
             }
-            float[] far = new float[100];
-            float[] frr = new float[100];
+            double[] far = new double[100];
+            double[] frr = new double[100];
 
-            float threshold = 0;
+            double threshold = 0.0;
+
             int k = 0;
-            for (threshold = 0; threshold<=1; threshold += (float)0.1)
+            for (threshold = 0; threshold <= 1.0; threshold += 0.1)
             {
                 far[k] = 0;
                 for (int i = 0; i < score.Length; i++)
@@ -78,26 +81,34 @@ namespace FingerPrint
                         far[k]++;
                     }
                 }
-                far[k] = far[k] / 300;
+                far[k] = far[k] / (totalFiles * totalFiles);
 
                 frr[k] = 0;
-                for (int j = 0; j < score.Length; j += 11)
+                for (int j = 0; j < score.Length; j += (totalFiles + 1))
                 {
-                    if (score[j] < threshold)
+                    //Console.WriteLine("Iteration : " + j.ToString());
+                    //Console.WriteLine("Threshold:");
+                    //Console.WriteLine(threshold);
+
+                    if (score[j] <= threshold)
                     {
+                        //Console.WriteLine("\n");
+                        //Console.WriteLine(score[j]);
+                        //Console.WriteLine("\n");
+                        //Console.WriteLine("\n");
                         frr[k]++;
                     }
+
                 }
 
-                frr[k] = frr[k] / 30;
+                frr[k] = frr[k] / (20);
                 k++;
             }
             k = 0;
-            for (double x = 0; x <= MaxX; x += 0.1)
+            for (double x = 0; x <=MaxX; x += 0.1)
             {
-
                 chart.Series["FAR"].Points.AddXY(x, far[k]);
-                chart.Series["FRR"].Points.AddXY(x, 1-far[k]);
+                chart.Series["FRR"].Points.AddXY(x, frr[k]);
                 k++;
             }
             chart.Series["FAR"].LegendText = "FAR";

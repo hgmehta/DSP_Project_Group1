@@ -8,3 +8,5 @@ C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj
 C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.csprojResolveAssemblyReference.cache
 C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.Plots.resources
 C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\obj\Debug\FingerPrint.csproj.GenerateResource.Cache
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\bin\Debug\HiddenWatermark.dll
+C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\bin\Debug\HiddenWatermark.pdb
