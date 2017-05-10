@@ -13,7 +13,7 @@ namespace FingerPrint
 {
     class Program
     {
-        static void buildDB(int TotalFiles)
+        static void buildDB(int TotalFiles, string path, string[] files, string[] share)
         {
             AfisEngine Afis = new AfisEngine();
 
@@ -22,22 +22,7 @@ namespace FingerPrint
             Fingerprint fp1 = new Fingerprint();
             Fingerprint fp2 = new Fingerprint();
 
-            string path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageScore.txt";
-
-            string[] files = new string[TotalFiles];
-            string[] outerImages = new string[TotalFiles];
             int k = 0;
-            for (int i = 0; i < TotalFiles/10; i++)
-            {
-                for (int j = 1; j <= 10; j++)
-                {
-                    files[k] = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Database\" + (i + 1).ToString() + "_" + j.ToString() + ".bmp";
-                    outerImages[k] = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Inner Images\ROI_" + (i + 1).ToString() + "_" + j.ToString() + ".png";
-                    k++;
-                }
-            }
-
-            k = 0;
 
             for (int i = 0; i < files.Length; i++)
             {
@@ -46,9 +31,9 @@ namespace FingerPrint
                 person1.Fingerprints.Add(fp1);
                 Afis.Extract(person1);
 
-                for (int j = 0; j < files.Length; j++)
+                for (int j = 0; j < share.Length; j++)
                 {
-                    fp2.AsBitmapSource = new BitmapImage(new Uri(outerImages[j], UriKind.RelativeOrAbsolute));
+                    fp2.AsBitmapSource = new BitmapImage(new Uri(share[j], UriKind.RelativeOrAbsolute));
                     Person person2 = new Person();
                     person2.Fingerprints.Add(fp2);
 
@@ -56,7 +41,7 @@ namespace FingerPrint
 
                     float score = Afis.Verify(person1, person2);
                     bool match = (score > Afis.Threshold);
-                    Console.WriteLine(files[i] + "\n Compare with " + files[j]);
+                    Console.WriteLine(files[i] + "\n Compare with " + share[j]);
                     Console.WriteLine(score.ToString());
                     using (StreamWriter sw = File.AppendText(path))
                     {
@@ -68,18 +53,16 @@ namespace FingerPrint
             }
         }
 
-        static void normalizeScore()
+        static void normalizeScore(string readFile, string writeFile)
         {
 
-            string[] lines = System.IO.File.ReadAllLines(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageScore.txt");
+            string[] lines = System.IO.File.ReadAllLines(readFile);
             float[] score = new float[lines.Length];
             
             for (int i = 0; i < lines.Length; i++)
             {
                 score[i] = float.Parse(lines[i]);
             }
-
-            //Console.WriteLine(max);
 
             float min = score.Min();
             float max = score.Max();
@@ -89,9 +72,7 @@ namespace FingerPrint
                 score[i] = (score[i] - min) / (max - min);
             }
 
-
-            string Path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageNormalizedScore.txt";
-
+            string Path = writeFile;
 
             using (StreamWriter sw = File.AppendText(Path))
             {
@@ -100,7 +81,6 @@ namespace FingerPrint
                     sw.WriteLine(score[i].ToString());
                 }
             }
-          //  string s = Console.ReadLine();
         }
 
         static void test()
@@ -136,66 +116,137 @@ namespace FingerPrint
 
         static void Main(string[] args)
         {
-            /*
-            int TotalFiles = 30;
-            buildDB(TotalFiles);
-            test();
-            normalizeScore();
-
-            CropImage c1 = new CropImage();
-
-            Bitmap source = new Bitmap(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Database\01_1.bmp");
-            Rectangle section = new Rectangle(new Point(12, 50), new Size(150, 150));
-            Graphics g = Graphics.FromImage(source);
-            Bitmap CroppedImage = c1.CreateCropImage(source, section);
-            Application.EnableVisualStyles();
-            Application.Run(new Plots(TotalFiles));
-            */
-
-            // Finding an Hash sign of an inner image
-            getHash hash = new getHash();
-            string path = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Inner Images\ROI_1_1.png";
-            byte[] hashCode = hash.getSHAofAnImage(path);
-
-            /*
-            for (int i=0;i<hashCode.Length;i++)
-            {
-                Console.WriteLine(hashCode[i].ToString());
-            }
-            Console.WriteLine("Length of Hash: "+hashCode.Length.ToString());
-            Console.ReadLine();
-            */
-
-            //Do watermarking
-            string outputImagePath;
             GenerateWatermark watermark = new GenerateWatermark();
 
-            //Creating new watermarkerdimage 
-            Bitmap watermarkedImage = watermark.getWatermarkedImage(path, hashCode, out outputImagePath);
-            watermarkedImage.Save(outputImagePath);
-            
-            //Retrive data from watermarked image
-            byte[] retrivedWatermark = watermark.retriveWatermark(outputImagePath);
+            int TotalFiles = 90;
+            int choice = 0;
+            string parentDirectory = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\";
+            string readFrom = "";
+            string writeTo = "";
+            string filename_write = "";
+            string filename_read = "";
 
-
-            //Chacking whether original data is matched with retrived data or not
-            bool value = true;
-            if (retrivedWatermark.Length != hashCode.Length)
+            string[] InnerImage = new string[TotalFiles];
+            string[] files = new string[TotalFiles];
+            string[] outerImage = new string[TotalFiles];
+            int k = 0;
+            for (int i = 0; i < TotalFiles / 10; i++)
             {
-                value = false;
-            }
-            if (value)
-            {
-                for (int i = 0; i < retrivedWatermark.Length; i++)
+                for (int j = 1; j <= 10; j++)
                 {
-                    if (retrivedWatermark[i] != hashCode[i])
-                    {
-                        value = false;
-                    }
+                    files[k] = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Database\" + (i + 1).ToString() + "_" + j.ToString() + ".bmp";
+                    outerImage[k] = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Outer Images\" + (i + 1).ToString() + "_" + j.ToString() + ".bmp";
+                    InnerImage[k] = @"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Inner Images\ROI_" + (i + 1).ToString() + "_" + j.ToString() + ".png";
+                    k++;
                 }
             }
-            Console.WriteLine(value.ToString());
-            Console.ReadLine();
+
+            Console.WriteLine("1. Generate Score file for original fingerprint");
+            Console.WriteLine("2. Generate Score file for outter share fingerprint");
+            Console.WriteLine("3. Generate Score file for inner share fingerprint");
+            Console.WriteLine("4. Plot FAR and FRR for original fingerprint");
+            Console.WriteLine("5. Plot FAR and FRR for outter share fingerprint");
+            Console.WriteLine("6. Plot FAR and FRR for inner share fingerprint");
+            Console.WriteLine("Select an optrion: ");
+            choice = Int32.Parse(Console.ReadLine());
+
+            switch (choice)
+            {
+                case 1:
+                    writeTo = "OriginalFingerPrint_" + TotalFiles.ToString() + ".txt";
+                    filename_write = parentDirectory + writeTo;
+                    buildDB(TotalFiles, filename_write,files,files);
+
+                    readFrom = "OriginalFingerPrint_" + TotalFiles.ToString() + ".txt";
+                    writeTo = "NormalizedOriginalFingerPrint_" + TotalFiles.ToString() + ".txt";
+                    filename_read = parentDirectory + readFrom;
+                    filename_write = parentDirectory + writeTo;
+                    normalizeScore(filename_read,filename_write);
+                    break;
+                case 2:
+                    writeTo = "OutterShare_" + TotalFiles.ToString() + ".txt";
+                    filename_write = parentDirectory + writeTo;
+                    buildDB(TotalFiles, filename_write,files, outerImage);
+
+                    readFrom = "OutterShare_" + TotalFiles.ToString() + ".txt";
+                    writeTo = "NormalizedOutterShare_" + TotalFiles.ToString() + ".txt";
+                    filename_read = parentDirectory + readFrom;
+                    filename_write = parentDirectory + writeTo;
+                    normalizeScore(filename_read, filename_write);
+                    break;
+                case 3:
+                    writeTo = "InnerShare_" + TotalFiles.ToString() + ".txt";
+                    filename_write = parentDirectory + writeTo;
+                    buildDB(TotalFiles, filename_write,files,InnerImage);
+
+                    readFrom = "InnerShare_" + TotalFiles.ToString() + ".txt";
+                    writeTo = "NormalizedInnerShare_" + TotalFiles.ToString() + ".txt";
+                    filename_read = parentDirectory + readFrom;
+                    filename_write = parentDirectory + writeTo;
+                    normalizeScore(filename_read, filename_write);
+                    break;
+                case 4:
+                    readFrom = "NormalizedOriginalFingerPrint_" + TotalFiles.ToString() + ".txt";
+                    filename_read = parentDirectory + readFrom;
+                    Application.EnableVisualStyles();
+                    Application.Run(new Plots(TotalFiles,filename_read));
+                    break;
+                case 5:
+                    readFrom = "NormalizedOutterShare_" + TotalFiles.ToString() + ".txt";
+                    filename_read = parentDirectory + readFrom;
+                    Application.EnableVisualStyles();
+                    Application.Run(new Plots(TotalFiles, filename_read));
+                    break;
+                case 6:
+                    readFrom = "NormalizedInnerShare_" + TotalFiles.ToString() + ".txt";
+                    filename_read = parentDirectory + readFrom;
+                    Application.EnableVisualStyles();
+                    Application.Run(new Plots(TotalFiles, filename_read));
+                    break;
+                case 7:
+                    watermark.CreateWaterMarkImage(InnerImage, outerImage,"InnerHashInOutterShare");
+                    break;
+                case 8:
+                    watermark.CreateWaterMarkImage(outerImage,InnerImage, "OutterHashInInnerShare");
+                    break;
+                default:
+                    break;
+            }
+
+            // Finding Bit Error Rate
+            /*
+            getHash g = new getHash();
+            byte[] hash1 = g.getSHAofAnImage(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Inner Images\ROI_2_1.png");
+            for (int j = 1; j <= 10; j++)
+            {
+                byte[] hash2 = g.getSHAofAnImage(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\Inner Images\ROI_2_" +j.ToString() +".png");
+                string yourByteString = "";
+                for (int i = 0;i<hash1.Length;i++)
+                {
+                    yourByteString = yourByteString + Convert.ToString(hash1[i], 2).PadLeft(8, '0');
+                }
+
+                string yourByteString1 = "";
+                for (int i = 0; i < hash2.Length; i++)
+                {
+                    yourByteString1 = yourByteString1 + Convert.ToString(hash2[i], 2).PadLeft(8, '0');
+                }
+                int Count = 0;
+                //Console.WriteLine(yourByteString);
+                //Console.WriteLine(yourByteString1);
+                for (int i = 0; i < yourByteString.Length; i++)
+                {
+                    if (yourByteString[i] != yourByteString1[i])
+                    {
+                        Count++;
+                    }
+                }
+                //Console.WriteLine(yourByteString[0].ToString());
+                Console.WriteLine(Count);
+                Count = 0;
+            }
+            */
+            //Console.ReadLine();
         }
     }
 }

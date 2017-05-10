@@ -16,10 +16,12 @@ namespace FingerPrint
     {
         Graph.Chart chart;
         int totalFiles = 0;
-        public Plots(int TotalFiles)
+        string path = "";
+        public Plots(int TotalFiles,string readFrom)
         {
             InitializeComponent();
             totalFiles = TotalFiles;
+            path = readFrom;
             this.ClientSize = new System.Drawing.Size(750, 900);
         }
 
@@ -52,13 +54,13 @@ namespace FingerPrint
             chart.Series["FAR"].ChartType = Graph.SeriesChartType.Line;
             chart.Series["FRR"].ChartType = Graph.SeriesChartType.Line;
             // Color the line of the graph light green and give it a thickness of 3
-            chart.Series["FAR"].Color = Color.LightGreen;
+            chart.Series["FAR"].Color = Color.Blue;
             chart.Series["FAR"].BorderWidth = 3;
-            chart.Series["FRR"].Color = Color.Blue;
+            chart.Series["FRR"].Color = Color.Green;
             chart.Series["FRR"].BorderWidth = 3;
             //This function cannot include zero, and we walk through it in steps of 0.1 to add coordinates to our series
 
-            string[] lines = System.IO.File.ReadAllLines(@"C:\Users\harsh\Documents\Visual Studio 2015\Projects\FingerPrint\FingerPrint\InnerImageNormalizedScore.txt");
+            string[] lines = System.IO.File.ReadAllLines(path);
             double[] score = new double[lines.Length];
 
             for (int i = 0; i < lines.Length; i++)
